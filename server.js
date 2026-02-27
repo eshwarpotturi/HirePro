@@ -314,7 +314,7 @@ const getConfigError = () => ({
 
 // Generic handler to wrap Gemini calls that expect a JSON response
 async function handleApiCall(res, modelCall) {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return res.status(500).json(getConfigError());
     }
@@ -345,7 +345,7 @@ async function handleApiCall(res, modelCall) {
 
 // Generic handler for Gemini calls that expect a plain text response
 async function handleTextApiCall(res, modelCall) {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return res.status(500).json(getConfigError());
     }
@@ -381,7 +381,7 @@ Return the tasks as a JSON array of objects. Each object must have a "title", a 
 Job Title: ${jobTitle}
 Job Description: ${jobDescription}`;
     
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return res.status(500).json(getConfigError());
     }
@@ -425,7 +425,7 @@ app.post('/api/modify-tasks', async (req, res) => {
     const { jobTitle, jobDescription, currentTasks, modification } = req.body;
     const prompt = `You are an assistant helping a recruiter refine a work simulation.\n\nJob Title: ${jobTitle}\nJob Description: ${jobDescription}\n\nHere is the current list of tasks for the simulation:\n${JSON.stringify(currentTasks, null, 2)}\n\nThe recruiter has requested the following modification: "${modification}"\n\nPlease generate and return a new, complete list of tasks that incorporates this change. Maintain the JSON array format, where each task object has a "title", "description", and a "type" ('TEXT', 'IMAGE', 'AUDIO', or 'VIDEO'). Make the description clearly state the expected submission type. If a task requires an asset (like an email or document), you MUST include it in an 'asset' object as per the schema.`;
 
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return res.status(500).json(getConfigError());
     }
