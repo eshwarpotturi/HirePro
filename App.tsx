@@ -235,7 +235,12 @@ const App: React.FC = () => {
     }
 
     setActiveReport(fullReport);
-    setPage(Page.PERFORMANCE_REPORT);
+    if (currentUser.role === Role.RECRUITER) {
+      setPage(Page.PERFORMANCE_REPORT);
+    } else {
+      setPage(Page.CANDIDATE_START);
+      setSimulationError("Thank you! Your simulation has been submitted successfully for review.");
+    }
   };
 
   const handleViewReport = (report: PerformanceReport) => {
@@ -308,11 +313,11 @@ const App: React.FC = () => {
         return <CandidateWorkspace simulation={activeSimulation} onComplete={handleSimulationComplete} />;
       
       case Page.PERFORMANCE_REPORT:
-        if (!activeReport) {
+        if (!activeReport || currentUser.role !== Role.RECRUITER) {
             resetToHome();
             return null;
         }
-        return <PerformanceReportDisplay report={activeReport} onBackToHome={currentUser.role === Role.RECRUITER ? () => setPage(Page.RECRUITER_DASHBOARD) : () => setPage(Page.CANDIDATE_START)} />;
+        return <PerformanceReportDisplay report={activeReport} onBackToHome={() => setPage(Page.RECRUITER_DASHBOARD)} />;
       
       default:
         // If user is logged in but on a public page, redirect them

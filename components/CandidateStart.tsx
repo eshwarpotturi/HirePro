@@ -62,12 +62,9 @@ const CandidateStart: React.FC<CandidateStartProps> = ({ onStartSimulation, comp
                             Completed on {new Date(report.completedAt).toLocaleDateString()}
                         </p>
                     </div>
-                    <button 
-                        onClick={() => onViewReport(report)}
-                        className="w-full sm:w-auto flex-shrink-0 bg-blue-600/80 hover:bg-blue-600 text-white font-semibold py-2 px-5 rounded-md text-sm transition-colors"
-                    >
-                        View Report
-                    </button>
+                    <div className="w-full sm:w-auto flex-shrink-0 bg-slate-700 text-slate-300 font-semibold py-2 px-5 rounded-md text-sm cursor-default">
+                        Submitted
+                    </div>
                 </div>
             ))}
           </div>
