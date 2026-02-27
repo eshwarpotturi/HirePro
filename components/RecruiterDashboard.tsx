@@ -73,7 +73,7 @@ interface CreateSimulationViewProps extends RecruiterDashboardProps {
   onSwitchTab: (tab: RecruiterTab) => void;
 }
 
-const CreateSimulationView: React.FC<CreateSimulationViewProps> = ({ onCreateSimulation, createdSimulation, previousSimulations, completedReports, onSwitchTab }) => {
+const CreateSimulationView: React.FC<CreateSimulationViewProps> = ({ onCreateSimulation, createdSimulation, previousSimulations, completedReports, onSwitchTab, onViewReport }) => {
   const [step, setStep] = useState<Step>('form');
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');

@@ -1,40 +1,64 @@
 import type { Task, CandidateWork, Simulation, TaskGroup } from '../types';
 
-// Generic fetch handler for API calls
-async function postApi<T>(endpoint: string, body: object): Promise<T> {
+// Generic fetch handler for API calls with robust error handling
+async function postApi<T>(endpoint: string, body: object, timeoutMs: number = 60000): Promise<T> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
-            let errorMessage = `The server responded with status ${response.status}.`;
+            let errorMessage = `Server error (${response.status})`;
+            
+            // Handle specific status codes
+            if (response.status === 429) {
+                errorMessage = "The AI service is currently busy (Rate Limit Exceeded). Please wait a moment and try again.";
+            } else if (response.status === 503 || response.status === 504) {
+                errorMessage = "The AI service is temporarily unavailable. Please try again in a few minutes.";
+            } else if (response.status === 401 || response.status === 403) {
+                errorMessage = "Authentication failed. Please check the server configuration.";
+            }
+
             try {
-                // Try to get a more specific error from the server's JSON response
                 const errorBody = await response.json();
                 if (errorBody && errorBody.error) {
                     errorMessage = errorBody.error;
                 }
             } catch (e) {
-                // The response body was not JSON, stick with the status code message.
+                // Not a JSON error response, use the status-based message
             }
+            
             throw new Error(errorMessage);
         }
-        return await response.json();
+
+        const data = await response.json();
+        return data;
+
     } catch (error) {
-        // Catch network errors or errors from the check above
+        clearTimeout(timeoutId);
+
         if (error instanceof Error) {
-            console.error(`API Error for ${endpoint}:`, error.message);
-            // Add a more user-friendly message for common network issues
-            if (error.message.includes('Failed to fetch')) {
-                throw new Error('Network error. Please check your internet connection and try again.');
+            if (error.name === 'AbortError') {
+                throw new Error('The request timed out. The AI service is taking longer than expected. Please try again.');
             }
-            throw error; // Re-throw the error to be handled by the caller
+            
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Unable to connect to the server. Please check your internet connection.');
+            }
+
+            console.error(`API Error for ${endpoint}:`, error.message);
+            throw error;
         }
-        // Fallback for unexpected error types
-        throw new Error(`An unexpected error occurred. Please check your network connection.`);
+        
+        throw new Error('An unexpected error occurred while communicating with the server.');
     }
 }
 

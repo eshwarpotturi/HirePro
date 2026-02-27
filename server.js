@@ -269,12 +269,13 @@ app.delete('/api/templates/:id', (req, res) => {
 });
 
 // --- External API for Unix/CLI queries ---
-app.get('/api/external/simulation-results/:id', (req, res) => {
-    const { id } = req.params;
+app.get('/api/external/today-results', (req, res) => {
+    const today = new Date().toISOString().split('T')[0];
+    const id = `SIM-${today}`;
     const simulation = appData.simulations[id];
     
     if (!simulation) {
-        return res.status(404).json({ error: "Simulation not found" });
+        return res.status(404).json({ error: `No simulation found for today (${today}).` });
     }
 
     // Filter reports for this simulation
