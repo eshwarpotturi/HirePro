@@ -308,18 +308,6 @@ app.get('/api/external/today-results', (req, res) => {
     });
 });
 
-// Vite middleware for development
-if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-        server: { middlewareMode: true },
-        appType: 'spa',
-    });
-    app.use(vite.middlewares);
-} else {
-    app.use(express.static(path.join(__dirname, 'dist')));
-}
-
 const getConfigError = () => ({
     error: "Configuration Error: The 'API_KEY' environment variable is missing on the server. Please check your hosting environment settings and ensure a variable named 'API_KEY' is set with your valid Gemini API key."
 });
@@ -664,6 +652,17 @@ app.post('/api/support-chat-response', async (req, res) => {
     }));
 });
 
+// Vite middleware for development
+if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+    });
+    app.use(vite.middlewares);
+} else {
+    app.use(express.static(path.join(__dirname, 'dist')));
+}
 
 // --- Serve Frontend ---
 // This catch-all route should be last.
